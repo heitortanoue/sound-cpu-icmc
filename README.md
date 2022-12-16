@@ -1,12 +1,12 @@
-## SOUND - Processador ICMC
----
+# SOUND - Processador ICMC
+
 > Adicionado comando *SOUND*, que corresponde ao número 52 (110001) no processador.
 
 ```assembly
 SOUND RX, RX, RZ
 ( 110001 / RX / RY / RZ / x )
 ```
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Waveforms.svg/600px-Waveforms.svg.png" alt="wave_forms" width="195" align="left" style="margin-right: 40px"/>
+<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Waveforms.svg/600px-Waveforms.svg.png" alt="wave_forms" width="230" align="right"/>
 
 -   **RX**: frequência da onda em *dHz* (*10 dHz = 1 Hz*)
 -   **RY**: duração em _ms_
@@ -19,7 +19,6 @@ SOUND RX, RX, RZ
 
 
 ## Como rodar
----
 ###  Usando os arquivos do repositório
 1. Clone esse repositório para seu computador
 ```bash
@@ -51,14 +50,12 @@ sh compila.sh
 - ***OBS***: Dentro da pasta ```files``` existe um jogo de teste que deve fazer um som assim que a tecla ENTER for pressionada.
 
 ## Requisitos para compilação
----
 - Compiladores GCC e G++
 - Bibliotecas
 	- GTK2
 	- SDL2
 
 ## Implementações
----
 ### Montador
 - Inserção do código "110001" (*SOUND*) no ```montador.c```.
 
