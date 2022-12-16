@@ -149,6 +149,6 @@ void play_note (int rx, int ry, int rz) {
         type = "sine";
         break;
     }
-    beeper.beep(type, rx, ry);
+    beeper.beep(type, rx/10, ry);
     beeper.wait(30);
 }
