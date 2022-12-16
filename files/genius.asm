@@ -120,11 +120,11 @@ digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra
 
 	store Letra, r0			; Salva a tecla na variavel global "Letra"
 	
-	loadn r0, #392
+	loadn r0, #3919
 	loadn r1, #1000
 	loadn r2, #0
 	sound r0,r1,r2
-	loadn r0, #523
+	loadn r0, #5232
 	loadn r1, #500
 	loadn r2, #2
 	sound r0,r1,r2
