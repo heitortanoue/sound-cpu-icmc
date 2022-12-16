@@ -65,3 +65,7 @@ sh compila.sh
 	- Gerador de funções sonoras no arquivo ```Sound.cpp```
 	- Programação das funções sonoras seno, quadrada, triangular e dente-de-serra
 - Modificação da classe ```Model``` e de seu método ```processador``` para aceitarem o novo código *SOUND*.
+
+## Participantes
+- [Heitor Tanoue](https://github.com/totoi690)
+- [Beatriz Cardoso](https://github.com/trizcard)
