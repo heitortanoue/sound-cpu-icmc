@@ -52,9 +52,10 @@ randSequence : var #35; tabela de nr. Randomicos
 ; 3: 0.25 (8)
 ; fim da tabela de nr. Randomicos
 
-jogadasAtual : var #1 ; indice da ultima jogada no vetor jogadas
-ultimaJogada : var #1 ; converte Letra para numero
+jogadasAtual : var #0 ; indice da ultima jogada no vetor jogadas
+ultimaJogada : var #0 ; converte Letra para numero
 jogadas : var #32
+numJogadas: var #0
 
 ; da pra dividir em tres grupos
 ; um -> piscarSequencia e verificaExec
@@ -68,6 +69,7 @@ main:   ; gera pagina inicial
     ; NAO REMOVER
     loadn r0, #0
     store jogadasAtual, r0
+    call insereJogadaAleatoria
     ; NAO REMOVER
 
 	call DesenharEstrelas;
@@ -87,25 +89,47 @@ main:   ; gera pagina inicial
 
 	call geraPaginaJogo
 	
-    ; gera a primeira jogada
+    ; pode comentar isso aqui depois
     call insereJogadaAleatoria
-
-    ; MODELO DE USO de acessaJogada
-    ; acessa primeira jogada
-    ; loadn r0, #1
-    ; para acessar a ultima jogada, use o valor de jogadasAtual
     loadn r0, #1
     call acessaJogada
     mov r1, r0
-    
-    call acessaJogada 
-    ; r0 contem o valor da jogada
+    loadn r0, #1
+    call acessaJogada
 
-    ;call digLetra
-    ;call converteLetraParaNumero
-    ;load r7, ultimaJogada
+    call loseSound
+
+    ;call loopJogo
+
 
 	halt
+
+loseSound:
+    push r0
+    push r1
+    push r2
+
+    loadn r2, #2 ;onda triangular
+
+    loadn r0, #5873 ; NOTE_D4
+    loadn r1, #400 ; 400ms
+    sound r0, r1, r2
+
+    loadn r0, #5544 ; NOTE_C4s
+    sound r0, r1, r2
+
+    loadn r0, #5232 ; NOTE_C4
+    sound r0, r1, r2
+
+    loadn r0, #4938 ; NOTE_B4
+    loadn r1, #1000 ; 1s
+    sound r0, r1, r2
+
+    pop r2
+    pop r1
+    pop r0
+
+    rts
 
 digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra"
 	push fr		; Protege o registrador de flags
@@ -118,16 +142,7 @@ digLetra:	; Espera que uma tecla seja digitada e salva na variavel global "Letra
 		cmp r0, r1			;compara r0 com 255
 		jeq digLetra_Loop	; Fica lendo ate' que digite uma tecla valida
 
-	store Letra, r0			; Salva a tecla na variavel global "Letra"
-	
-	loadn r0, #3919
-	loadn r1, #1000
-	loadn r2, #0
-	sound r0,r1,r2
-	loadn r0, #5232
-	loadn r1, #500
-	loadn r2, #2
-	sound r0,r1,r2
+	store Letra, r0			; Salva a tecla na variavel global "Letra"			
 	
 	pop r1
 	pop r0
@@ -257,11 +272,14 @@ geraAleatorio: ; gera num aleatorio de 0 a 3 (para o proximo valor do genius)
 ;(r0 - 1) é o valor maximo que pode ser gerado
 geraAleatorioComMax:
    push r1
+   push r2
 
    mov r1, r0
    call geraAleatorio
-   mod r0, r0, r1
+   mod r2, r0, r1
+   mov r0, r2
 
+    pop r2
    pop r1
    rts
 
@@ -275,7 +293,6 @@ acessaJogada:
     ; r1 = posicao a ser acessada
     loadn r0, #jogadas
     add r2, r1, r0
-
     ; r2 agora aponta para a posicao da jogada
     loadi r0, r2
 
@@ -288,91 +305,32 @@ insereJogadaAleatoria:
     push r0
     push r1
     push r2
+    push r3
 
-    ; incrementa o contador de jogadas
-    load r0, jogadasAtual
-    inc r0
-    store jogadasAtual, r0
-    
-    ; coloca em r2 a posicao a ser acessada
+    ; r3 = contador de jogadas
+    load r3, jogadasAtual
+
+    ; coloca em r1 a posicao a ser acessada
     loadn r1, #jogadas
-    add r2, r1, r0
+    add r2, r1, r3
 
     ; r0 = num max - 1
     loadn r0, #4
     call geraAleatorioComMax
-    mov r6, r0
 
     ; r0 = valor aleatorio
     ; r2 = posicao a ser acessada
     storei r2, r0
 
+    inc r3
+    store jogadasAtual, r3
+
+    pop r3
     pop r2
     pop r1
     pop r0
     rts
 
-; converte a variavel Letra para um numero de 0 a 3 (cores)
-converteLetraParaNumero:
-    ; push r0
-    ; push r1
-
-    load r1, Letra
-    ; inicio das letras minusculas da tabela ascii
-    loadn r0, #96
-    cmp r1, r0
-
-    ; se for letra minuscula > 96, subtrai 32
-    jeg substracaoLetraMinuscula
-
-    ; ja sendo letra maiuscula:
-    mov r6, r1
-
-    ; compara com W (verde)
-    loadn r0, #87
-    cmp r1, r0
-    ; se for W, retorna 0
-    loadn r0, #0
-    jeq fimConverteLetraParaNumero
-
-    ; compara com A (amarelo)
-    loadn r0, #65
-    cmp r1, r0
-    ; se for A, retorna 2
-    loadn r0, #2
-    jeq fimConverteLetraParaNumero
-
-    ; compara com S (azul)
-    loadn r0, #83
-    cmp r1, r0
-    ; se for S, retorna 3
-    loadn r0, #3
-    jeq fimConverteLetraParaNumero
-
-    ; compara com D (vermelho)
-    loadn r0, #68
-    cmp r1, r0
-    ; se for D, retorna 1
-    loadn r0, #1
-    jeq fimConverteLetraParaNumero
-
-    ; pop r1
-    ; pop r0
-
-    rts
-
-substracaoLetraMinuscula:
-    push r0
-    loadn r0, #32 
-    sub r1, r1, r0
-    pop r0
-
-    rts
-
-; r0 = numero a ser colocado na letra
-fimConverteLetraParaNumero:
-    store ultimaJogada, r0
-    rts
 
 DesenharEstrelas:
 	loadn r0, #70
@@ -458,3 +416,287 @@ ImprimestrSai:
 	pop r1
 	pop r0
 	rts		; retorno da subrotina
+
+Delay:
+	push r0
+	push r1
+	
+	loadn r1, #800  ; a
+   	Delay_volta2:				;Quebrou o contador acima em duas partes (dois loops de decremento)
+	loadn r0, #3000	; b
+   	Delay_volta: 
+	dec r0					; (4*a + 6)b = 1000000  == 1 seg  em um clock de 1MHz
+	jnz Delay_volta	
+	dec r1
+	jnz Delay_volta2
+	
+	pop r1
+	pop r0
+	
+	rts
+	
+limpaBlocos:
+	push r1
+	push r2
+
+	loadn r1, #3840
+
+	loadn r2, #216 ; posicao do bloco de cima
+	call desenhaBloco
+
+	loadn r2, #525 ; posicao do bloco de esq
+	call desenhaBloco
+
+	loadn r2, #547 ; posicao do bloco de dir
+	call desenhaBloco
+	
+	loadn r2, #856 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+	
+blocoCima:
+	push r1
+	push r2
+	
+	loadn r1, #512 ; cor
+	loadn r2, #216 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+	
+blocoBaixo:
+	push r1
+	push r2
+	
+	loadn r1, #3072 ; cor
+	loadn r2, #856 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+
+blocoEsq:
+	push r1
+	push r2
+	
+	loadn r1, #2816 ; cor
+	loadn r2, #525 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+
+blocoDir:
+	push r1
+	push r2
+	
+	loadn r1, #2304 ; cor
+	loadn r2, #547 ; posicao do bloco de baixo
+	call desenhaBloco
+	
+	pop r2
+	pop r1
+	
+	rts
+	
+geraBlocoAleat:
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	
+    ; MODELO DE USO de acessaJogada
+    ; acessa primeira jogada
+    ; para acessar a ultima jogada, use o valor de jogadasAtual
+    ; load r0, jogadasAtual
+    ;call acessaJogada
+    ; r0 contem o valor da jogada
+	;load r0, jogadasAtual
+	
+	
+    loadn r0, #4
+    call geraAleatorioComMax
+    
+	loadn r1, #0
+	cmp r0, r1
+	ceq blocoCima
+	
+	loadn r2, #1
+	cmp r0, r2
+	ceq blocoDir
+	
+	loadn r3, #2
+	cmp r0, r3
+	ceq blocoEsq
+	
+	loadn r4, #3
+	cmp r0, r4
+	ceq blocoBaixo
+	
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	rts
+	
+LoopJogada:
+	push r0
+	push r1
+	push r2
+	push r3
+	
+	load r0, jogadasAtual
+	load r3, jogadasAtual ; contador
+	
+	geraLoop:
+		loadi r2, r0
+		call acessaJogada
+		call geraBlocoAleat
+		call Delay
+		call limpaBlocos
+		loadi r0, r2
+		dec r0
+		dec r3
+		jnz geraLoop
+	
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	
+	rts
+	
+entradasJogador:
+	push r0
+	push r1
+
+	load r0, jogadasAtual
+	loopEntrada:
+		call entrada
+		call limpaBlocos
+		call geraBlocoJogador
+		
+		dec r0
+		jnz loopEntrada
+		
+	pop r0
+	pop r1
+	
+	call Delay
+	
+	rts
+
+entrada:
+	push fr
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	
+	digita:
+		call digLetra
+		
+		load r0, Letra
+		loadn r1, #'w'
+		loadn r2, #'a'
+		loadn r3, #'s'
+		loadn r4, #'d'
+		
+		cmp r0, r1
+		jeq retorna
+		cmp r0, r2
+		jeq retorna
+		cmp r0, r3
+		jeq retorna
+		cmp r0, r4
+		jeq retorna
+		
+		jmp digita 
+
+	retorna:
+		pop r4
+		pop r3
+		pop r2
+		pop r1
+		pop r0	
+		pop fr
+		rts
+	
+geraBlocoJogador:
+	push fr
+	push r0
+	push r1
+	push r2
+	push r3
+	push r4
+	
+    ;loadn r0, #4
+    ;call geraAleatorioComMax
+	load r0, Letra
+    
+	loadn r1, #'w'
+	cmp r0, r1
+	ceq blocoCima
+	
+	loadn r2, #'d'
+	cmp r0, r2
+	ceq blocoDir
+	
+	loadn r3, #'a'
+	cmp r0, r3
+	ceq blocoEsq
+	
+	loadn r4, #'s'
+	cmp r0, r4
+	ceq blocoBaixo
+	
+	pop r4
+	pop r3
+	pop r2
+	pop r1
+	pop r0
+	pop fr
+	rts
+	
+loopJogo:
+	push r0
+	push r1
+	push r2
+	
+	load r0, numJogadas
+	inc r0
+	store numJogadas, r0
+	
+	call insereJogadaAleatoria
+		
+	call LoopJogada
+		
+
+	call entradasJogador
+	call limpaBlocos
+	
+	call Delay
+	call Delay
+	call Delay
+
+	pop r2
+	pop r1
+	pop r0
+
+	jmp loopJogo
+	
+	rts

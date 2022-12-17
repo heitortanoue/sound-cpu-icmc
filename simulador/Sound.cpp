@@ -150,5 +150,5 @@ void play_note (int rx, int ry, int rz) {
         break;
     }
     beeper.beep(type, rx/10, ry);
-    beeper.wait(30);
+    beeper.wait(5);
 }
